@@ -113,7 +113,7 @@ func GetParent() *PrivsepProcess {
 	return GetPeer("")
 }
 
-func GetPeer(name string) *PrivsepProcess {
+func GetProcess(name string) *PrivsepProcess {
 	return privsepCtx.processes[name]
 }
 
