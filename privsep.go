@@ -110,7 +110,7 @@ func Start() error {
 }
 
 func GetParent() *PrivsepProcess {
-	return GetPeer("")
+	return GetProcess("")
 }
 
 func GetProcess(name string) *PrivsepProcess {
@@ -216,7 +216,7 @@ func child_dispatcher(name string, r chan ipcmsg.IPCMessage, w chan ipcmsg.IPCMe
 	for msg := range r {
 		switch msg.Hdr.Type {
 		case IPCMSG_CHANNEL:
-			peer := GetPeer(string(msg.Data))
+			peer := GetProcess(string(msg.Data))
 			log.Printf("[%s] creating channel with %s over fd %d", name, peer.name, msg.Fd)
 			r, w := ipcmsg.Channel(os.Getpid(), msg.Fd)
 			peer.r = r
