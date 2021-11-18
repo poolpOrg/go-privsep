@@ -315,6 +315,10 @@ func (process *PrivsepProcess) Channel(peer *PrivsepProcess, dispatcher func(r c
 	privsepCtx.channels = append(privsepCtx.channels, channel)
 }
 
-func (process *PrivsepProcess) Write(msg ipcmsg.IPCMessage) {
-	process.w <- msg
+func (process *PrivsepProcess) Write(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
+	if fd == -1 {
+		process.w <- ipcmsg.Message(msgtype, payload)
+	} else {
+		process.w <- ipcmsg.MessageWithFd(msgtype, payload, fd)
+	}
 }

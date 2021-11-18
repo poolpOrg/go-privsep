@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	IPCMSG_PING = 1
-	IPCMSG_PONG = 2
+	IPCMSG_PING ipcmsg.IPCMsgType = iota
+	IPCMSG_PONG ipcmsg.IPCMsgType = iota
 )
 
 func parent_main() {
@@ -34,7 +34,7 @@ func parent_main() {
 
 func foobar_main() {
 	parent := privsep.GetParent()
-	parent.Write(ipcmsg.Message(IPCMSG_PING, []byte("abcdef")))
+	parent.Write(IPCMSG_PING, []byte("abcdef"), -1)
 	<-make(chan bool)
 }
 
