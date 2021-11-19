@@ -19,8 +19,8 @@ package main
 import (
 	"log"
 
-	"github.com/poolpOrg/ipcmsg"
-	"github.com/poolpOrg/privsep"
+	"github.com/poolpOrg/go-ipcmsg"
+	"github.com/poolpOrg/go-privsep"
 )
 
 const (
