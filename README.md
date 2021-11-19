@@ -1,6 +1,6 @@
 # privsep
 
-WIP: This is work in progress, do not use for anything serious.
+WIP: This is work in progress
 
 The privsep package provides a simple API to setup OpenBSD-style daemons,
 relying on privileges separation and the fork+reexec pattern.
