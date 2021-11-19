@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/poolpOrg/ipcmsg"
+	"github.com/poolpOrg/go-ipcmsg"
 )
 
 type Privsep struct {
