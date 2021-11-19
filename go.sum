@@ -1,6 +1,10 @@
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/poolpOrg/ipcmsg v0.0.0-20210409233631-f49c8d3d84e0 h1:/C4UDWbPq1mk7iVglnTEubGFbHXkV3BBnmbdZguFCuk=
 github.com/poolpOrg/ipcmsg v0.0.0-20210409233631-f49c8d3d84e0/go.mod h1:7hQ1Lc0rmYDiYaSe64KvhzqtW+wOuMSXkbTcLr7dbFg=
 github.com/poolpOrg/ipcmsg v0.0.0-20211118223233-f33b455b5140 h1:yREdJEgygjyfWdDTavRv5RXrqoOl/HkjoVBIeZo2Mgs=
 github.com/poolpOrg/ipcmsg v0.0.0-20211118223233-f33b455b5140/go.mod h1:7hQ1Lc0rmYDiYaSe64KvhzqtW+wOuMSXkbTcLr7dbFg=
 github.com/poolpOrg/ipcmsg v0.0.0-20211118233910-535d88a4473d h1:wiDLWqLylO3iJl5zYNXn5dyZs7vcVwGWr/NF1dIsdtw=
 github.com/poolpOrg/ipcmsg v0.0.0-20211118233910-535d88a4473d/go.mod h1:7hQ1Lc0rmYDiYaSe64KvhzqtW+wOuMSXkbTcLr7dbFg=
+github.com/poolpOrg/ipcmsg v0.0.0-20211119002926-2abcfc0cb22b h1:IwBekM5MgoNM4Zb1bVqWtY7ZKm7I7Nrs47Fj3dKP7lc=
+github.com/poolpOrg/ipcmsg v0.0.0-20211119002926-2abcfc0cb22b/go.mod h1:WfTmufkeYbZtdSqehlnXMUDTGu5qwJmVZLO9P39MSWo=

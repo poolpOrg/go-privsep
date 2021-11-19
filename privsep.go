@@ -61,8 +61,8 @@ type PrivsepProcess struct {
 }
 
 const (
-	IPCMSG_CHANNEL = 1
-	IPCMSG_READY   = 2
+	IPCMSG_CHANNEL ipcmsg.IPCMsgType = iota
+	IPCMSG_READY   ipcmsg.IPCMsgType = iota
 )
 
 var privsepCtx Privsep
@@ -276,13 +276,13 @@ func setup_channels() {
 		p1 := channel.p1
 		p2 := channel.p2
 		if p1 != privsepCtx.current {
-			p1.ipcmsg_w <- ipcmsg.MessageWithFd(IPCMSG_CHANNEL, []byte(p2.name), sp[0])
+			p1.ipcmsg_w <- ipcmsg.Message(IPCMSG_CHANNEL, []byte(p2.name), sp[0])
 		} else {
 			p1.r, p1.w = ipcmsg.Channel(os.Getpid(), sp[0])
 			go privsepCtx.current.channels[p2.name](p1.r, p1.w)
 		}
 		if p2 != privsepCtx.current {
-			p2.ipcmsg_w <- ipcmsg.MessageWithFd(IPCMSG_CHANNEL, []byte(p1.name), sp[1])
+			p2.ipcmsg_w <- ipcmsg.Message(IPCMSG_CHANNEL, []byte(p1.name), sp[1])
 		} else {
 			p2.r, p2.w = ipcmsg.Channel(os.Getpid(), sp[1])
 			go privsepCtx.current.channels[p2.name](p2.r, p2.w)
@@ -293,7 +293,7 @@ func setup_channels() {
 func notify_ready() {
 	for process := range privsepCtx.processes {
 		if process != "" {
-			privsepCtx.processes[process].ipcmsg_w <- ipcmsg.Message(IPCMSG_READY, []byte(""))
+			privsepCtx.processes[process].ipcmsg_w <- ipcmsg.Message(IPCMSG_READY, []byte(""), -1)
 		}
 	}
 }
@@ -316,9 +316,5 @@ func (process *PrivsepProcess) Channel(peer *PrivsepProcess, dispatcher func(r c
 }
 
 func (process *PrivsepProcess) Write(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
-	if fd == -1 {
-		process.w <- ipcmsg.Message(msgtype, payload)
-	} else {
-		process.w <- ipcmsg.MessageWithFd(msgtype, payload, fd)
-	}
+	process.w <- ipcmsg.Message(msgtype, payload, -1)
 }

@@ -42,7 +42,7 @@ func parent_dispatcher(r chan ipcmsg.IPCMessage, w chan ipcmsg.IPCMessage) {
 	for msg := range r {
 		if msg.Hdr.Type == IPCMSG_PING {
 			log.Printf("[parent] received PING, sending PONG\n")
-			w <- ipcmsg.Message(IPCMSG_PONG, []byte("abcdef"))
+			w <- ipcmsg.Message(IPCMSG_PONG, []byte("abcdef"), -1)
 		}
 	}
 }
@@ -51,7 +51,7 @@ func foobar_dispatcher(r chan ipcmsg.IPCMessage, w chan ipcmsg.IPCMessage) {
 	for msg := range r {
 		if msg.Hdr.Type == IPCMSG_PONG {
 			log.Printf("[foobar] received PONG, sending PING\n")
-			w <- ipcmsg.Message(IPCMSG_PING, []byte("abcdef"))
+			w <- ipcmsg.Message(IPCMSG_PING, []byte("abcdef"), -1)
 		}
 	}
 }
