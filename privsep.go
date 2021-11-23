@@ -49,6 +49,8 @@ type PrivsepProcess struct {
 	Username   string
 	Chrootpath string
 
+	preChrootHandler func() error
+
 	ipcmsg_r chan ipcmsg.IPCMessage
 	ipcmsg_w chan ipcmsg.IPCMessage
 
@@ -158,6 +160,11 @@ func forkChild(name string) (int, int) {
 }
 
 func privdrop() {
+
+	if privsepCtx.current.preChrootHandler != nil {
+		privsepCtx.current.preChrootHandler()
+	}
+
 	if privsepCtx.current.Chrootpath != "" {
 		err := syscall.Chroot(privsepCtx.current.Chrootpath)
 		if err != nil {
@@ -317,4 +324,8 @@ func (process *PrivsepProcess) Channel(peer *PrivsepProcess, dispatcher func(r c
 
 func (process *PrivsepProcess) Write(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
 	process.w <- ipcmsg.Message(msgtype, payload, -1)
+}
+
+func (process *PrivsepProcess) PreChrootHandler(handler func() error) {
+	process.preChrootHandler = handler
 }
