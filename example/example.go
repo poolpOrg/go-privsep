@@ -42,7 +42,7 @@ func main_foobar() {
 func main_barbaz() {
 	foobar := privsep.GetProcess("foobar")
 	foobar.SetHandler(IPCMSG_PONG, pong_handler)
-	foobar.Write(IPCMSG_PING, []byte("test"), -1)
+	foobar.Message(IPCMSG_PING, []byte("test"), -1)
 	<-make(chan bool)
 }
 

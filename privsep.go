@@ -320,7 +320,7 @@ func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler fun
 	privsepCtx.current.channels[process.name].Handler(msgtype, handler)
 }
 
-func (process *PrivsepProcess) Write(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
+func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
 	privsepCtx.current.channels[process.name].Message(msgtype, payload, -1)
 }
 
