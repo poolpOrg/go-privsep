@@ -32,38 +32,37 @@ func parent_main() {
 	<-make(chan bool) // sleep forever
 }
 
-func foobar_main() {
-	parent := privsep.GetParent()
-	parent.Write(IPCMSG_PING, []byte("abcdef"), -1)
+func main_foobar() {
+	barbaz := privsep.GetProcess("barbaz")
+	barbaz.SetHandler(IPCMSG_PING, ping_handler)
 	<-make(chan bool)
 }
 
-func parent_dispatcher(r chan ipcmsg.IPCMessage, w chan ipcmsg.IPCMessage) {
-	for msg := range r {
-		if msg.Hdr.Type == IPCMSG_PING {
-			log.Printf("[parent] received PING, sending PONG\n")
-			w <- ipcmsg.Message(IPCMSG_PONG, []byte("abcdef"), -1)
-		}
-	}
+func main_barbaz() {
+	foobar := privsep.GetProcess("foobar")
+	foobar.SetHandler(IPCMSG_PONG, pong_handler)
+	foobar.Write(IPCMSG_PING, []byte("test"), -1)
+	<-make(chan bool)
 }
 
-func foobar_dispatcher(r chan ipcmsg.IPCMessage, w chan ipcmsg.IPCMessage) {
-	for msg := range r {
-		if msg.Hdr.Type == IPCMSG_PONG {
-			log.Printf("[foobar] received PONG, sending PING\n")
-			w <- ipcmsg.Message(IPCMSG_PING, []byte("abcdef"), -1)
-		}
-	}
+func ping_handler(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
+	log.Printf("[foobar] received PING\n")
+	channel.Reply(msg, IPCMSG_PONG, []byte("test"), -1)
+}
+
+func pong_handler(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
+	log.Printf("[barbaz] received PONG\n")
+	channel.Reply(msg, IPCMSG_PING, []byte("test"), -1)
 }
 
 func main() {
 	privsep.Init()
 
-	parent := privsep.Parent(parent_main)
-	foobar := privsep.Child("foobar", foobar_main)
+	_ = privsep.Parent(parent_main)
+	foobar := privsep.Child("foobar", main_foobar)
+	barbaz := privsep.Child("barbaz", main_barbaz)
 
-	parent.Channel(foobar, parent_dispatcher)
-	foobar.Channel(parent, foobar_dispatcher)
+	privsep.Channel(barbaz, foobar)
 
 	privsep.Start()
 }
