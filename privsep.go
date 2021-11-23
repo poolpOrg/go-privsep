@@ -302,7 +302,6 @@ func Channel(p1 *PrivsepProcess, p2 *PrivsepProcess) {
 }
 
 // PrivsepProcess
-
 func (process *PrivsepProcess) CreateChannel(peer *PrivsepProcess) *PrivsepChannel {
 	channel := PrivsepChannel{}
 	channel.p1 = process
@@ -323,6 +322,10 @@ func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler fun
 
 func (process *PrivsepProcess) Write(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
 	privsepCtx.current.channels[process.name].Message(msgtype, payload, -1)
+}
+
+func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) ([]byte, int) {
+	return privsepCtx.current.channels[process.name].Query(msgtype, payload, -1)
 }
 
 func (process *PrivsepProcess) PreChrootHandler(handler func() error) {
