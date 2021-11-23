@@ -217,7 +217,6 @@ func setup_parent() {
 			privsepCtx.processes[process].fd = fd
 
 			// setup ipcmsg channel with child
-			log.Printf("[%s] creating channel with %s over fd %d", privsepCtx.current.name, process, fd)
 			channel := ipcmsg.NewChannel(pid, fd)
 			privsepCtx.processes[process].privsep_channel = channel
 			go channel.Dispatch()
@@ -241,7 +240,6 @@ func setup_child() {
 
 	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
 		peer := GetProcess(string(msg.Data))
-		log.Printf("[%s] creating channel with %s over fd %d", privsepCtx.current.name, peer.name, msg.Fd)
 		privsepCtx.current.channels[peer.name] = ipcmsg.NewChannel(os.Getpid(), msg.Fd)
 		go privsepCtx.current.channels[peer.name].Dispatch()
 	})
@@ -259,7 +257,6 @@ func setup_child() {
 
 func setup_channels() {
 	for _, channel := range privsepCtx.channels {
-		log.Println(channel)
 		sp, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, syscall.AF_UNSPEC)
 		if err != nil {
 			log.Fatal(err)
