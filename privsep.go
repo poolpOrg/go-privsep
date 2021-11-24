@@ -324,7 +324,7 @@ func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, payload []byte
 	privsepCtx.current.channels[process.name].Message(msgtype, payload, -1)
 }
 
-func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) ([]byte, int) {
+func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) (ipcmsg.IPCMsgType, []byte, int) {
 	return privsepCtx.current.channels[process.name].Query(msgtype, payload, -1)
 }
 
