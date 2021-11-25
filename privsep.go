@@ -97,6 +97,7 @@ func Start() error {
 		privsepCtx.current = privsepCtx.processes[reexec]
 		setup_child(reexec)
 	}
+
 	if reexec != GetParent().name {
 		<-privsepCtx.current.ready
 	}
@@ -108,6 +109,7 @@ func Start() error {
 	for _, channel := range privsepCtx.current.channels {
 		go channel.Dispatch()
 	}
+
 	privsepCtx.current.main()
 	return nil
 }
@@ -118,6 +120,10 @@ func GetParent() *PrivsepProcess {
 
 func GetProcess(name string) *PrivsepProcess {
 	return privsepCtx.processes[name]
+}
+
+func GetCurrentProcess() *PrivsepProcess {
+	return privsepCtx.current
 }
 
 func forkChild(name string) (int, int) {
@@ -241,11 +247,12 @@ func setup_child(name string) {
 
 	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
 		peer := GetProcess(string(msg.Data))
-		privsepCtx.current.channels[peer.name] = ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s", name, peer.name), os.Getpid(), msg.Fd)
+		GetCurrentProcess().channels[peer.name] = ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s", name, peer.name), os.Getpid(), msg.Fd)
+		channel.Reply(msg, IPCMSG_CHANNEL, []byte(""), -1)
 	})
 
 	ipcmsg_channel.Handler(IPCMSG_READY, func(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
-		privsepCtx.current.ready <- true
+		GetCurrentProcess().ready <- true
 	})
 
 	GetParent().privsep_channel = ipcmsg_channel
@@ -278,15 +285,15 @@ func setup_channels() {
 					log.Fatal(err)
 				}
 
-				if curProcess != privsepCtx.current {
-					curProcess.privsep_channel.Message(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
+				if curProcess != GetCurrentProcess() {
+					_, _, _ = curProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
 				} else {
-					privsepCtx.current.channels[peerProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[0])
+					GetCurrentProcess().channels[peerProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[0])
 				}
-				if peerProcess != privsepCtx.current {
-					peerProcess.privsep_channel.Message(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
+				if peerProcess != GetCurrentProcess() {
+					_, _, _ = peerProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
 				} else {
-					privsepCtx.current.channels[curProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[1])
+					GetCurrentProcess().channels[curProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[1])
 				}
 			}
 		}
@@ -295,7 +302,7 @@ func setup_channels() {
 
 func notify_ready() {
 	for process := range privsepCtx.processes {
-		if process != "" {
+		if process != privsepCtx.parent {
 			privsepCtx.processes[process].privsep_channel.Message(IPCMSG_READY, []byte(""), -1)
 		}
 	}
@@ -318,11 +325,11 @@ func (process *PrivsepProcess) TalksTo(peers ...string) {
 }
 
 func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler func(*ipcmsg.Channel, ipcmsg.IPCMessage)) {
-	privsepCtx.current.channels[process.name].Handler(msgtype, handler)
+	GetCurrentProcess().channels[process.name].Handler(msgtype, handler)
 }
 
 func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
-	privsepCtx.current.channels[process.name].Message(msgtype, payload, -1)
+	GetCurrentProcess().channels[process.name].Message(msgtype, payload, -1)
 }
 
 func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) (ipcmsg.IPCMsgType, []byte, int) {

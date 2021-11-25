@@ -34,14 +34,11 @@ func parent_main() {
 }
 
 func main_foobar() {
-	barbaz := privsep.GetProcess("barbaz")
-	barbaz.SetHandler(IPCMSG_PING, ping_handler)
 	<-make(chan bool)
 }
 
 func main_barbaz() {
 	foobar := privsep.GetProcess("foobar")
-	foobar.SetHandler(IPCMSG_PONG, pong_handler)
 	foobar.Message(IPCMSG_PING, []byte("test"), -1)
 	<-make(chan bool)
 }
@@ -61,9 +58,21 @@ func pong_handler(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
 func main() {
 	privsep.Init()
 
-	privsep.Parent("parent", parent_main).TalksTo("foobar")
-	privsep.Child("foobar", main_foobar).TalksTo("barbaz", "parent")
+	privsep.Parent("parent", parent_main)
+	privsep.Child("foobar", main_foobar).TalksTo("barbaz")
 	privsep.Child("barbaz", main_barbaz).TalksTo("foobar")
+
+	privsep.GetProcess("foobar").PreStartHandler(func() error {
+		barbaz := privsep.GetProcess("barbaz")
+		barbaz.SetHandler(IPCMSG_PING, ping_handler)
+		return nil
+	})
+
+	privsep.GetProcess("barbaz").PreStartHandler(func() error {
+		foobar := privsep.GetProcess("foobar")
+		foobar.SetHandler(IPCMSG_PONG, pong_handler)
+		return nil
+	})
 
 	privsep.Start()
 }
