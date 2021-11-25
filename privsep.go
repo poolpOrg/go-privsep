@@ -45,15 +45,14 @@ type PrivsepProcess struct {
 	Chrootpath string
 
 	preChrootHandler func() error
-	channelHandlers  func() error
+	preStartHandler  func() error
 
 	privsep_channel *ipcmsg.Channel
 
-	peers []string
+	peers    []string
+	channels map[string]*ipcmsg.Channel
 
 	ready chan bool
-
-	channels map[string]*ipcmsg.Channel
 }
 
 const (
@@ -102,10 +101,13 @@ func Start() error {
 		<-privsepCtx.current.ready
 	}
 
-	if privsepCtx.current.channelHandlers != nil {
-		privsepCtx.current.channelHandlers()
+	if privsepCtx.current.preStartHandler != nil {
+		privsepCtx.current.preStartHandler()
 	}
 
+	for _, channel := range privsepCtx.current.channels {
+		go channel.Dispatch()
+	}
 	privsepCtx.current.main()
 	return nil
 }
@@ -240,7 +242,6 @@ func setup_child(name string) {
 	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
 		peer := GetProcess(string(msg.Data))
 		privsepCtx.current.channels[peer.name] = ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s", name, peer.name), os.Getpid(), msg.Fd)
-		go privsepCtx.current.channels[peer.name].Dispatch()
 	})
 
 	ipcmsg_channel.Handler(IPCMSG_READY, func(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
@@ -281,13 +282,11 @@ func setup_channels() {
 					curProcess.privsep_channel.Message(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
 				} else {
 					privsepCtx.current.channels[peerProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[0])
-					go privsepCtx.current.channels[peerProcess.name].Dispatch()
 				}
 				if peerProcess != privsepCtx.current {
 					peerProcess.privsep_channel.Message(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
 				} else {
 					privsepCtx.current.channels[curProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[1])
-					go privsepCtx.current.channels[curProcess.name].Dispatch()
 				}
 			}
 		}
@@ -334,6 +333,6 @@ func (process *PrivsepProcess) PreChrootHandler(handler func() error) {
 	process.preChrootHandler = handler
 }
 
-func (process *PrivsepProcess) registerChannelHandlers(handler func() error) {
-	process.channelHandlers = handler
+func (process *PrivsepProcess) PreStartHandler(handler func() error) {
+	process.preStartHandler = handler
 }
