@@ -61,11 +61,9 @@ func pong_handler(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
 func main() {
 	privsep.Init()
 
-	_ = privsep.Parent(parent_main)
-	foobar := privsep.Child("foobar", main_foobar)
-	barbaz := privsep.Child("barbaz", main_barbaz)
-
-	privsep.Channel(barbaz, foobar)
+	privsep.Parent("parent", parent_main).TalksTo("foobar")
+	privsep.Child("foobar", main_foobar).TalksTo("barbaz", "parent")
+	privsep.Child("barbaz", main_barbaz).TalksTo("foobar")
 
 	privsep.Start()
 }

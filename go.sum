@@ -6,3 +6,5 @@ github.com/poolpOrg/go-ipcmsg v0.0.0-20211121232808-4e539c2a9977 h1:rNTh1CCGbPvV
 github.com/poolpOrg/go-ipcmsg v0.0.0-20211121232808-4e539c2a9977/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
 github.com/poolpOrg/go-ipcmsg v0.0.0-20211123233539-4a6d9b274a5d h1:EvjfIPnHM5EaCURpN8BoqL/dnTJUTPMMM/MVdheOS7U=
 github.com/poolpOrg/go-ipcmsg v0.0.0-20211123233539-4a6d9b274a5d/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20211125090423-2f9f29d4e66e h1:5VHzltx/jzOoHhiE/X6QxmujhxQZTdOfFTnxpouQBoI=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20211125090423-2f9f29d4e66e/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
