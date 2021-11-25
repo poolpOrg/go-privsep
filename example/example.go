@@ -44,13 +44,13 @@ func main_barbaz() {
 }
 
 func ping_handler(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
-	log.Printf("[foobar] received PING\n")
+	log.Printf("[%s] received PING\n", privsep.GetCurrentProcess().Name())
 	time.Sleep(1 * time.Second)
 	channel.Reply(msg, IPCMSG_PONG, []byte("test"), -1)
 }
 
 func pong_handler(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
-	log.Printf("[barbaz] received PONG\n")
+	log.Printf("[%s] received PONG\n", privsep.GetCurrentProcess().Name())
 	time.Sleep(1 * time.Second)
 	channel.Reply(msg, IPCMSG_PING, []byte("test"), -1)
 }

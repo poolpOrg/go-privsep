@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"os/user"
 	"strconv"
+	"sync"
 	"syscall"
 
 	"github.com/poolpOrg/go-ipcmsg"
@@ -53,6 +54,7 @@ type PrivsepProcess struct {
 	channels map[string]*ipcmsg.Channel
 
 	ready chan bool
+	wg    sync.WaitGroup
 }
 
 const (
@@ -98,7 +100,7 @@ func Start() error {
 		setup_child(reexec)
 	}
 
-	if reexec != GetParent().name {
+	if GetParent() != GetCurrentProcess() {
 		<-privsepCtx.current.ready
 	}
 
@@ -218,7 +220,7 @@ func privdrop() {
 
 func setup_parent() {
 	for process := range privsepCtx.processes {
-		if process != "" {
+		if process != privsepCtx.parent {
 			pid, fd := forkChild(process)
 			privsepCtx.processes[process].pid = pid
 			privsepCtx.processes[process].fd = fd
@@ -278,23 +280,30 @@ func setup_channels() {
 				log.Fatalf("%s has not declared %s as a peer", peerProcess.name, curProcess.name)
 			}
 
-			// first, check if a channel already exists
-			if _, exists := curProcess.channels[peerProcess.name]; !exists {
-				sp, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, syscall.AF_UNSPEC)
-				if err != nil {
-					log.Fatal(err)
-				}
+			if _, exists := curProcess.channels[peerProcess.Name()]; exists {
+				continue
+			}
 
-				if curProcess != GetCurrentProcess() {
-					_, _, _ = curProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
-				} else {
-					GetCurrentProcess().channels[peerProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[0])
-				}
-				if peerProcess != GetCurrentProcess() {
-					_, _, _ = peerProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
-				} else {
-					GetCurrentProcess().channels[curProcess.name] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.name, peerProcess.name), os.Getpid(), sp[1])
-				}
+			if _, exists := peerProcess.channels[curProcess.Name()]; exists {
+				continue
+			}
+
+			// first, check if a channel already exists
+			sp, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, syscall.AF_UNSPEC)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if curProcess != GetCurrentProcess() {
+				_, _, _ = curProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
+			} else {
+				GetCurrentProcess().channels[peerProcess.Name()] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.Name(), peerProcess.Name()), os.Getpid(), sp[0])
+			}
+
+			if peerProcess != GetCurrentProcess() {
+				_, _, _ = peerProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
+			} else {
+				GetCurrentProcess().channels[curProcess.Name()] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", peerProcess.Name(), curProcess.Name()), os.Getpid(), sp[1])
 			}
 		}
 	}
@@ -322,6 +331,10 @@ func (process *PrivsepProcess) TalksTo(peers ...string) {
 			process.peers = append(process.peers, peer)
 		}
 	}
+}
+
+func (process *PrivsepProcess) Name() string {
+	return process.name
 }
 
 func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler func(*ipcmsg.Channel, ipcmsg.IPCMessage)) {
