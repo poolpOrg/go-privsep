@@ -356,3 +356,11 @@ func (process *PrivsepProcess) PreChrootHandler(handler func() error) {
 func (process *PrivsepProcess) PreStartHandler(handler func() error) {
 	process.preStartHandler = handler
 }
+
+func (process *PrivsepProcess) ChannelIn() <-chan ipcmsg.IPCMessage {
+	return GetCurrentProcess().channels[process.name].ChannelIn()
+}
+
+func (process *PrivsepProcess) ChannelOut() <-chan ipcmsg.IPCMessage {
+	return GetCurrentProcess().channels[process.name].ChannelOut()
+}
