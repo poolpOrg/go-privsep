@@ -342,11 +342,11 @@ func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler fun
 }
 
 func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
-	GetCurrentProcess().channels[process.name].Message(msgtype, payload, -1)
+	GetCurrentProcess().channels[process.name].Message(msgtype, payload, fd)
 }
 
 func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) (ipcmsg.IPCMsgType, []byte, int) {
-	return privsepCtx.current.channels[process.name].Query(msgtype, payload, -1)
+	return privsepCtx.current.channels[process.name].Query(msgtype, payload, fd)
 }
 
 func (process *PrivsepProcess) PreChrootHandler(handler func() error) {
