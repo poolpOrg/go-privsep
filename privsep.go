@@ -361,6 +361,6 @@ func (process *PrivsepProcess) ChannelIn() <-chan ipcmsg.IPCMessage {
 	return GetCurrentProcess().channels[process.name].ChannelIn()
 }
 
-func (process *PrivsepProcess) ChannelOut() <-chan ipcmsg.IPCMessage {
+func (process *PrivsepProcess) ChannelOut() chan<- ipcmsg.IPCMessage {
 	return GetCurrentProcess().channels[process.name].ChannelOut()
 }
