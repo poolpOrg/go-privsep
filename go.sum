@@ -6,3 +6,11 @@ github.com/poolpOrg/go-ipcmsg v0.0.0-20230110092021-9d5015b861f8 h1:FvcKm3HaN6pZ
 github.com/poolpOrg/go-ipcmsg v0.0.0-20230110092021-9d5015b861f8/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
 github.com/poolpOrg/go-ipcmsg v0.0.0-20230110093654-be77f33a9350 h1:ieEci5GK1H+S+V+4FOKgcQArrdy1qaQT6TTtt6494hk=
 github.com/poolpOrg/go-ipcmsg v0.0.0-20230110093654-be77f33a9350/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110112715-8d4b5b690474 h1:8tGGNUakUrMcQfnTqXMZ679pxL4Wyig/2psw8FmQh0A=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110112715-8d4b5b690474/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110122407-def7447b3ec0 h1:Bat6xJf4aro2Sndj6w+bLLP9K/BSsHcSVoL5muYAayI=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110122407-def7447b3ec0/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110130112-928cf19c5e1c h1:mNe8EAuWcqpaAd/d7HjC8G1EO5MELu8b6cgIlUOfLQk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110130112-928cf19c5e1c/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110135041-966bc2251727 h1:/qmfiahQn6et9qFGcYi5AGhFbve7GJlnjA6U+spCerc=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110135041-966bc2251727/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=

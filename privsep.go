@@ -57,9 +57,9 @@ type PrivsepProcess struct {
 	wg    sync.WaitGroup
 }
 
-const (
-	IPCMSG_CHANNEL ipcmsg.IPCMsgType = iota
-	IPCMSG_READY   ipcmsg.IPCMsgType = iota
+var (
+	IPCMSG_CHANNEL ipcmsg.IPCMsgType = ipcmsg.NewIPCMsgType(string(""))
+	IPCMSG_READY   ipcmsg.IPCMsgType = ipcmsg.NewIPCMsgType(string(""))
 )
 
 var privsepCtx Privsep
@@ -248,9 +248,12 @@ func setup_child(name string) {
 	ipcmsg_channel := ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s (ipcmsg)", name, privsepCtx.parent), parent.pid, parent.fd)
 
 	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(msg ipcmsg.IPCMessage) {
-		peer := GetProcess(string(msg.Data))
-		GetCurrentProcess().channels[peer.name] = ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s", name, peer.name), os.Getpid(), msg.Fd)
-		msg.Reply(IPCMSG_CHANNEL, []byte(""), -1)
+		var peerName string
+		msg.Unmarshal(&peerName)
+
+		peer := GetProcess(peerName)
+		GetCurrentProcess().channels[peer.name] = ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s", name, peer.name), os.Getpid(), msg.Fd())
+		msg.Reply(IPCMSG_CHANNEL, "", -1)
 	})
 
 	ipcmsg_channel.Handler(IPCMSG_READY, func(msg ipcmsg.IPCMessage) {
@@ -295,13 +298,13 @@ func setup_channels() {
 			}
 
 			if curProcess != GetCurrentProcess() {
-				_ = curProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
+				_ = curProcess.privsep_channel.Query(IPCMSG_CHANNEL, peerProcess.name, sp[0])
 			} else {
 				GetCurrentProcess().channels[peerProcess.Name()] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.Name(), peerProcess.Name()), os.Getpid(), sp[0])
 			}
 
 			if peerProcess != GetCurrentProcess() {
-				_ = peerProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
+				_ = peerProcess.privsep_channel.Query(IPCMSG_CHANNEL, curProcess.name, sp[1])
 			} else {
 				GetCurrentProcess().channels[curProcess.Name()] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", peerProcess.Name(), curProcess.Name()), os.Getpid(), sp[1])
 			}
@@ -312,7 +315,7 @@ func setup_channels() {
 func notify_ready() {
 	for process := range privsepCtx.processes {
 		if process != privsepCtx.parent {
-			privsepCtx.processes[process].privsep_channel.Message(IPCMSG_READY, []byte(""), -1)
+			privsepCtx.processes[process].privsep_channel.Message(IPCMSG_READY, "", -1)
 		}
 	}
 }
@@ -341,12 +344,12 @@ func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler fun
 	GetCurrentProcess().channels[process.name].Handler(msgtype, handler)
 }
 
-func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) {
-	GetCurrentProcess().channels[process.name].Message(msgtype, payload, fd)
+func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, msg interface{}, fd int) {
+	GetCurrentProcess().channels[process.name].Message(msgtype, msg, fd)
 }
 
-func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) ipcmsg.IPCMessage {
-	return privsepCtx.current.channels[process.name].Query(msgtype, payload, fd)
+func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, msg interface{}, fd int) ipcmsg.IPCMessage {
+	return privsepCtx.current.channels[process.name].Query(msgtype, msg, fd)
 }
 
 func (process *PrivsepProcess) PreChrootHandler(handler func() error) {

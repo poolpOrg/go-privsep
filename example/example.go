@@ -24,9 +24,9 @@ import (
 	"github.com/poolpOrg/go-privsep"
 )
 
-const (
-	IPCMSG_PING ipcmsg.IPCMsgType = iota
-	IPCMSG_PONG ipcmsg.IPCMsgType = iota
+var (
+	IPCMSG_PING ipcmsg.IPCMsgType = ipcmsg.NewIPCMsgType(uint64(0))
+	IPCMSG_PONG ipcmsg.IPCMsgType = ipcmsg.NewIPCMsgType(uint64(0))
 )
 
 func parent_main() {
@@ -39,20 +39,28 @@ func main_foobar() {
 
 func main_barbaz() {
 	foobar := privsep.GetProcess("foobar")
-	foobar.Message(IPCMSG_PING, []byte("test"), -1)
+
+	var seq uint64
+	foobar.Message(IPCMSG_PING, seq, -1)
 	<-make(chan bool)
 }
 
 func ping_handler(msg ipcmsg.IPCMessage) {
-	log.Printf("[%s] received PING\n", privsep.GetCurrentProcess().Name())
+	var seq uint64
+	msg.Unmarshal(&seq)
+
+	log.Printf("[%s] received PING with seqid=%d\n", privsep.GetCurrentProcess().Name(), seq)
 	time.Sleep(1 * time.Second)
-	msg.Reply(IPCMSG_PONG, []byte("test"), -1)
+	msg.Reply(IPCMSG_PONG, seq+1, -1)
 }
 
 func pong_handler(msg ipcmsg.IPCMessage) {
-	log.Printf("[%s] received PONG\n", privsep.GetCurrentProcess().Name())
+	var seq uint64
+	msg.Unmarshal(&seq)
+
+	log.Printf("[%s] received PONG with seqid=%d\n", privsep.GetCurrentProcess().Name(), seq)
 	time.Sleep(1 * time.Second)
-	msg.Reply(IPCMSG_PING, []byte("test"), -1)
+	msg.Reply(IPCMSG_PING, seq+1, -1)
 }
 
 func main() {
