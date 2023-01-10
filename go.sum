@@ -1,8 +1,8 @@
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/poolpOrg/go-ipcmsg v0.0.0-20211125090423-2f9f29d4e66e h1:5VHzltx/jzOoHhiE/X6QxmujhxQZTdOfFTnxpouQBoI=
-github.com/poolpOrg/go-ipcmsg v0.0.0-20211125090423-2f9f29d4e66e/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
-github.com/poolpOrg/go-ipcmsg v0.0.0-20211125144711-b40e9f5cf6b6 h1:UDLe5b0dZK2xvIfvndXsbbMX26g2jSQBAs81F+OXQRs=
-github.com/poolpOrg/go-ipcmsg v0.0.0-20211125144711-b40e9f5cf6b6/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
 github.com/poolpOrg/go-ipcmsg v0.0.0-20230108232208-1f9b840d9811 h1:2pYhOT8xgTmB7AcZpFZmEiXvEHoIoXWgwJFQr/rSKdA=
 github.com/poolpOrg/go-ipcmsg v0.0.0-20230108232208-1f9b840d9811/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110092021-9d5015b861f8 h1:FvcKm3HaN6pZnTiSqKV6gMXHHYvYQBlr3Gr9BgCpw2c=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110092021-9d5015b861f8/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110093654-be77f33a9350 h1:ieEci5GK1H+S+V+4FOKgcQArrdy1qaQT6TTtt6494hk=
+github.com/poolpOrg/go-ipcmsg v0.0.0-20230110093654-be77f33a9350/go.mod h1:uqB1dYFdB0PRocsX5MgkuzUlUm1sYYFAVYR/TFukLTk=

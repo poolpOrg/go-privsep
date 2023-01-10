@@ -247,13 +247,13 @@ func setup_child(name string) {
 	// setup ipcmsg channel with parent
 	ipcmsg_channel := ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s (ipcmsg)", name, privsepCtx.parent), parent.pid, parent.fd)
 
-	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
+	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(msg ipcmsg.IPCMessage) {
 		peer := GetProcess(string(msg.Data))
 		GetCurrentProcess().channels[peer.name] = ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s", name, peer.name), os.Getpid(), msg.Fd)
-		channel.Reply(msg, IPCMSG_CHANNEL, []byte(""), -1)
+		msg.Reply(IPCMSG_CHANNEL, []byte(""), -1)
 	})
 
-	ipcmsg_channel.Handler(IPCMSG_READY, func(channel *ipcmsg.Channel, msg ipcmsg.IPCMessage) {
+	ipcmsg_channel.Handler(IPCMSG_READY, func(msg ipcmsg.IPCMessage) {
 		GetCurrentProcess().ready <- true
 	})
 
@@ -295,13 +295,13 @@ func setup_channels() {
 			}
 
 			if curProcess != GetCurrentProcess() {
-				_, _, _ = curProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
+				_ = curProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(peerProcess.name), sp[0])
 			} else {
 				GetCurrentProcess().channels[peerProcess.Name()] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", curProcess.Name(), peerProcess.Name()), os.Getpid(), sp[0])
 			}
 
 			if peerProcess != GetCurrentProcess() {
-				_, _, _ = peerProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
+				_ = peerProcess.privsep_channel.Query(IPCMSG_CHANNEL, []byte(curProcess.name), sp[1])
 			} else {
 				GetCurrentProcess().channels[curProcess.Name()] = ipcmsg.NewChannel(fmt.Sprintf("%s<->%s", peerProcess.Name(), curProcess.Name()), os.Getpid(), sp[1])
 			}
@@ -337,7 +337,7 @@ func (process *PrivsepProcess) Name() string {
 	return process.name
 }
 
-func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler func(*ipcmsg.Channel, ipcmsg.IPCMessage)) {
+func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler func(ipcmsg.IPCMessage)) {
 	GetCurrentProcess().channels[process.name].Handler(msgtype, handler)
 }
 
@@ -345,7 +345,7 @@ func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, payload []byte
 	GetCurrentProcess().channels[process.name].Message(msgtype, payload, fd)
 }
 
-func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) (ipcmsg.IPCMsgType, []byte, int) {
+func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, payload []byte, fd int) ipcmsg.IPCMessage {
 	return privsepCtx.current.channels[process.name].Query(msgtype, payload, fd)
 }
 
