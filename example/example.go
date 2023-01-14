@@ -45,7 +45,7 @@ func main_barbaz() {
 	<-make(chan bool)
 }
 
-func ping_handler(msg ipcmsg.IPCMessage) {
+func ping_handler(msg *ipcmsg.IPCMessage) {
 	var seq uint64
 	msg.Unmarshal(&seq)
 
@@ -54,7 +54,7 @@ func ping_handler(msg ipcmsg.IPCMessage) {
 	msg.Reply(IPCMSG_PONG, seq+1, -1)
 }
 
-func pong_handler(msg ipcmsg.IPCMessage) {
+func pong_handler(msg *ipcmsg.IPCMessage) {
 	var seq uint64
 	msg.Unmarshal(&seq)
 

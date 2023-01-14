@@ -247,7 +247,7 @@ func setup_child(name string) {
 	// setup ipcmsg channel with parent
 	ipcmsg_channel := ipcmsg.NewChannel(fmt.Sprintf("%s <-> %s (ipcmsg)", name, privsepCtx.parent), parent.pid, parent.fd)
 
-	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(msg ipcmsg.IPCMessage) {
+	ipcmsg_channel.Handler(IPCMSG_CHANNEL, func(msg *ipcmsg.IPCMessage) {
 		var peerName string
 		msg.Unmarshal(&peerName)
 
@@ -256,7 +256,7 @@ func setup_child(name string) {
 		msg.Reply(IPCMSG_CHANNEL, "", -1)
 	})
 
-	ipcmsg_channel.Handler(IPCMSG_READY, func(msg ipcmsg.IPCMessage) {
+	ipcmsg_channel.Handler(IPCMSG_READY, func(msg *ipcmsg.IPCMessage) {
 		GetCurrentProcess().ready <- true
 	})
 
@@ -340,7 +340,7 @@ func (process *PrivsepProcess) Name() string {
 	return process.name
 }
 
-func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler func(ipcmsg.IPCMessage)) {
+func (process *PrivsepProcess) SetHandler(msgtype ipcmsg.IPCMsgType, handler func(*ipcmsg.IPCMessage)) {
 	GetCurrentProcess().channels[process.name].Handler(msgtype, handler)
 }
 
@@ -348,7 +348,7 @@ func (process *PrivsepProcess) Message(msgtype ipcmsg.IPCMsgType, msg interface{
 	GetCurrentProcess().channels[process.name].Message(msgtype, msg, fd)
 }
 
-func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, msg interface{}, fd int) ipcmsg.IPCMessage {
+func (process *PrivsepProcess) Query(msgtype ipcmsg.IPCMsgType, msg interface{}, fd int) *ipcmsg.IPCMessage {
 	return privsepCtx.current.channels[process.name].Query(msgtype, msg, fd)
 }
 
@@ -360,10 +360,10 @@ func (process *PrivsepProcess) PreStartHandler(handler func() error) {
 	process.preStartHandler = handler
 }
 
-func (process *PrivsepProcess) ChannelIn() <-chan ipcmsg.IPCMessage {
+func (process *PrivsepProcess) ChannelIn() <-chan *ipcmsg.IPCMessage {
 	return GetCurrentProcess().channels[process.name].ChannelIn()
 }
 
-func (process *PrivsepProcess) ChannelOut() chan<- ipcmsg.IPCMessage {
+func (process *PrivsepProcess) ChannelOut() chan<- *ipcmsg.IPCMessage {
 	return GetCurrentProcess().channels[process.name].ChannelOut()
 }
