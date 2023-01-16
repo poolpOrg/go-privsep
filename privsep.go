@@ -55,6 +55,8 @@ type PrivsepProcess struct {
 
 	ready chan bool
 	wg    sync.WaitGroup
+
+	pledgePromises string
 }
 
 var (
@@ -214,7 +216,13 @@ func privdrop() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
 
+	if privsepCtx.current.pledgePromises != "" {
+		err := PledgePromises(privsepCtx.current.pledgePromises)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -366,4 +374,8 @@ func (process *PrivsepProcess) ChannelIn() <-chan *ipcmsg.IPCMessage {
 
 func (process *PrivsepProcess) ChannelOut() chan<- *ipcmsg.IPCMessage {
 	return GetCurrentProcess().channels[process.name].ChannelOut()
+}
+
+func (process *PrivsepProcess) Pledge(promises string) {
+	process.pledgePromises = promises
 }
