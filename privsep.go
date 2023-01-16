@@ -27,7 +27,13 @@ import (
 	"syscall"
 
 	"github.com/poolpOrg/go-ipcmsg"
+	"suah.dev/protect"
 )
+
+type unveilParams struct {
+	path  string
+	flags string
+}
 
 type Privsep struct {
 	current   *PrivsepProcess
@@ -57,6 +63,7 @@ type PrivsepProcess struct {
 	wg    sync.WaitGroup
 
 	pledgePromises string
+	unveilParams   []unveilParams
 }
 
 var (
@@ -218,8 +225,21 @@ func privdrop() {
 		}
 	}
 
+	if len(privsepCtx.current.unveilParams) != 0 {
+		for _, unveilParam := range privsepCtx.current.unveilParams {
+			err := protect.Unveil(unveilParam.path, unveilParam.flags)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		err := protect.UnveilBlock()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	if privsepCtx.current.pledgePromises != "" {
-		err := PledgePromises(privsepCtx.current.pledgePromises)
+		err := protect.Pledge(privsepCtx.current.pledgePromises)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -378,4 +398,11 @@ func (process *PrivsepProcess) ChannelOut() chan<- *ipcmsg.IPCMessage {
 
 func (process *PrivsepProcess) Pledge(promises string) {
 	process.pledgePromises = promises
+}
+
+func (process *PrivsepProcess) Unveil(path string, flags string) {
+	process.unveilParams = append(process.unveilParams, unveilParams{
+		path:  path,
+		flags: flags,
+	})
 }
