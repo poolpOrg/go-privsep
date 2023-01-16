@@ -71,14 +71,12 @@ func main() {
 	privsep.Child("barbaz", main_barbaz).TalksTo("foobar")
 
 	privsep.GetProcess("foobar").PreStartHandler(func() error {
-		barbaz := privsep.GetProcess("barbaz")
-		barbaz.SetHandler(IPCMSG_PING, ping_handler)
+		privsep.GetProcess("barbaz").SetHandler(IPCMSG_PING, ping_handler)
 		return nil
 	})
 
 	privsep.GetProcess("barbaz").PreStartHandler(func() error {
-		foobar := privsep.GetProcess("foobar")
-		foobar.SetHandler(IPCMSG_PONG, pong_handler)
+		privsep.GetProcess("foobar").SetHandler(IPCMSG_PONG, pong_handler)
 		return nil
 	})
 
